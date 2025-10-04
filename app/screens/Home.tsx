@@ -1,3 +1,4 @@
+import { useNetworkStatus } from "@/hooks/useNetwork";
 import { useUsers } from "@/hooks/useUser";
 import { logout } from "@/redux/authSlice";
 import { useRouter } from "expo-router";
@@ -17,18 +18,21 @@ const Home = () => {
   const router = useRouter();
   const userEmail = useSelector((state: any) => state.auth?.email);
   const { loading, error, users } = useUsers();
+  const isOnline = useNetworkStatus();
 
+  
   const handleLogout = () => {
     dispatch(logout());
     router.replace("/(auth)/Login");
   };
 
-  // ✅ Helper to get only the part of email before @
+  // ✅ Show only part of email before @
   const getShortEmail = (email: string) => {
     if (!email) return "";
     return email.split("@")[0];
   };
 
+  // ✅ Loading UI
   if (loading) {
     return (
       <View style={styles.center}>
@@ -48,6 +52,17 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+      <View
+        style={[
+          styles.banner,
+          { backgroundColor: isOnline ? "green" : "red" },
+        ]}
+      >
+        <Text style={styles.bannerText}>
+          {isOnline ? "✅ Online" : "❌ Offline"}
+        </Text>
+      </View>
+
       {/* Header Row */}
       <View style={styles.headerRow}>
         <Text style={styles.header}>
@@ -99,6 +114,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
     paddingHorizontal: 16,
     paddingTop: 40,
+  },
+  banner: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  bannerText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
   },
   headerRow: {
     flexDirection: "row",
